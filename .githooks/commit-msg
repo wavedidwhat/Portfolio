@@ -1,0 +1,3 @@
+#!/bin/sh
+# Strips AI attribution trailers before the commit is written.
+exec node "$(git rev-parse --show-toplevel)/scripts/scrub-attribution.mjs" --msg "$1"

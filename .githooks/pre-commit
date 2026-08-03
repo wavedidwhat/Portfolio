@@ -1,0 +1,3 @@
+#!/bin/sh
+# Strips AI mentions from staged comments; blocks if one shares a line with code.
+exec node "$(git rev-parse --show-toplevel)/scripts/scrub-attribution.mjs" --staged

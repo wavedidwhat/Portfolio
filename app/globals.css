@@ -1,0 +1,2740 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------
+   tokens. light is default; [data-theme] always beats the OS pref
+   so the toggle can't be overruled.
+---------------------------------------------------------------- */
+:root {
+  --bg: #f4f2ee;
+  --bg-raised: #fffefb;
+
+  /* one foreground, four steps of it. deriving the ramp as alpha (yevtam's
+     rgba(22,22,22,.54) trick) means the dark theme needs one new value, not five */
+  --ink-rgb: 22 21 15;
+  --ink-strong: rgb(var(--ink-rgb));
+  --ink: rgb(var(--ink-rgb) / 0.9);
+  --ink-soft: rgb(var(--ink-rgb) / 0.62);
+  --ink-muted: rgb(var(--ink-rgb) / 0.46);
+  --ink-faint: rgb(var(--ink-rgb) / 0.34);
+
+  /* two-step rule ramp: hairline for internal dividers, stronger for borders */
+  --rule: rgb(var(--ink-rgb) / 0.07);
+  --rule-strong: rgb(var(--ink-rgb) / 0.16);
+  --line: var(--rule-strong);
+
+  /* the one accent. all four reference sites use exactly one, sparingly. */
+  --accent: #17888c;
+
+  /* lava lamp wax: two stops the shader gradients between, plus its opacity.
+     kept as tokens so the look is tunable here rather than in shader maths. */
+  --lava-a: #0a0908;
+  --lava-b: #3a372c;
+  --lava-alpha: 0.15;
+
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 3rem;
+  --space-xl: 5rem;
+  --space-2xl: 8rem;
+
+  /* glass, borrowed conceptually from the reference dock */
+  --glass-tint: #ffffff;
+  --glass-light: #ffffff;
+  --glass-dark: #000000;
+  --glass-reflex-light: 1;
+  --glass-reflex-dark: 1;
+  --glass-saturation: 150%;
+  /* the dock plate needs real opacity on a light page or it disappears */
+  --glass-plate: rgb(255 255 255 / 0.29);
+
+  --dock-size: 54px;
+  --dock-gap: 8px;
+  --dock-radius: 23.5%;
+
+  /* yevtam's case tokens: a wide content track, a narrow reading measure */
+  --content-width: min(1120px, calc(100vw - 72px));
+  --summary-width: 560px;
+
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root[data-theme="dark"] {
+  --bg: #100f0d;
+  --bg-raised: #1a1916;
+
+  /* the whole ink + rule ramp follows from this one swap */
+  --ink-rgb: 242 239 232;
+  --accent: #4fd6cf;
+  --lava-a: #ffffff;
+  --lava-b: #c9c3b5;
+  --lava-alpha: 0.17;
+
+  --glass-tint: #2a2823;
+  --glass-light: #ffffff;
+  --glass-dark: #000000;
+  --glass-reflex-light: 0.4;
+  --glass-reflex-dark: 1.6;
+  --glass-plate: rgb(48 45 39 / 0.29);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.5s var(--ease), color 0.5s var(--ease);
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+/* mono is the chrome voice — labels, kickers, meta. never body copy. */
+.mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.shell {
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------- cursor */
+/* The dot is decorative unless the OS cursor is hidden. Only on fine pointers —
+   never hide it on touch/coarse, and never on real text inputs. */
+@media (hover: hover) and (pointer: fine) {
+  html,
+  body,
+  a,
+  button,
+  [role="button"] {
+    cursor: none;
+  }
+
+  input,
+  textarea,
+  select,
+  [contenteditable] {
+    cursor: auto;
+  }
+}
+
+.cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 13px;
+  height: 13px;
+  margin: -6.5px 0 0 -6.5px;
+  border-radius: 999px;
+  /* --ink-strong flips with the theme, so this is dark on light and light on
+     dark automatically. `mix-blend-mode: difference` used to wash it out to a
+     muddy grey over mid-tones — a solid fill with a contrasting ring reads on
+     any background, including the lava. */
+  background: var(--ink-strong);
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--bg) 80%, transparent);
+  pointer-events: none;
+  z-index: 90;
+  opacity: 0;
+  transition: opacity 0.3s var(--ease), transform 0.25s var(--ease);
+}
+
+.cursor-dot[data-active="true"] {
+  opacity: 1;
+}
+
+.cursor-dot[data-hot="true"] {
+  transform: scale(2.6);
+  opacity: 0.75;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .cursor-dot {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------- header */
+.header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+}
+
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  height: 2.25rem;
+  padding: 0 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-raised) 78%, transparent);
+  backdrop-filter: blur(10px) saturate(var(--glass-saturation));
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: border-color 0.25s var(--ease), transform 0.25s var(--ease);
+}
+
+.chip:hover {
+  border-color: var(--ink-muted);
+  transform: translateY(-1px);
+}
+
+.chip:active {
+  transform: scale(0.94);
+}
+
+.chip--icon {
+  width: 2.25rem;
+  padding: 0;
+}
+
+.chip svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.icon-sun,
+.icon-moon {
+  position: absolute;
+  transition: opacity 0.3s var(--ease), transform 0.45s var(--ease);
+}
+
+:root[data-theme="light"] .icon-moon {
+  opacity: 0;
+  transform: rotate(40deg) scale(0.6);
+}
+:root[data-theme="light"] .icon-sun {
+  opacity: 1;
+}
+:root[data-theme="dark"] .icon-sun {
+  opacity: 0;
+  transform: rotate(-40deg) scale(0.6);
+}
+:root[data-theme="dark"] .icon-moon {
+  opacity: 1;
+}
+
+/* --------------------------------------------------------------- views */
+/* Chrome visibility is driven off body[data-view], exactly as the reference
+   does it. The dock disappears on every view except home — Back is the only
+   way out. The header survives on about (so the theme toggle stays reachable
+   there) but not on projects or indexes. */
+body[data-view]:not([data-view="home"]) .dock,
+body[data-view]:not([data-view="home"]):not([data-view="about"]) .header {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.dock,
+.header {
+  transition: opacity 0.45s var(--ease), visibility 0.45s var(--ease);
+}
+
+/* project views lift the page with a soft top glow, 640ms like the reference */
+body[data-view]:not([data-view="home"]) {
+  background-image:
+    radial-gradient(circle at 50% 8%, color-mix(in srgb, var(--bg-raised) 82%, transparent), transparent 34%),
+    radial-gradient(circle at 20% 18%, color-mix(in srgb, var(--bg-raised) 42%, transparent), transparent 28%);
+  transition: background 640ms cubic-bezier(0.22, 1, 0.36, 1), color 320ms ease;
+}
+
+/* the lava sits behind everything; .stage has to establish a stacking context
+   above it or the canvas paints over the copy */
+.lava {
+  position: fixed;
+  inset: 0;
+  /* A <canvas> is a replaced element: inset:0 alone does NOT size it, so it fell
+     back to its intrinsic (attribute) size — 1.5× too wide on a DPR-2 phone,
+     because the drawing buffer is scaled by DPR. Explicit CSS size is required. */
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  display: block;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.8s var(--ease);
+}
+
+.lava[data-on="true"] {
+  opacity: 1;
+}
+
+.stage {
+  position: relative;
+  z-index: 1;
+  min-height: 100svh;
+}
+
+.screen {
+  display: none;
+}
+
+.screen[data-active="true"] {
+  display: block;
+}
+
+/* --------------------------------------------------------------- home */
+.home {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--space-xl) 0 14rem;
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 2.75rem;
+}
+
+.avatar {
+  position: relative;
+  width: 3.1rem;
+  height: 3.1rem;
+  flex: none;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(120% 120% at 30% 20%, rgb(255 255 255 / 0.65), transparent 60%),
+    conic-gradient(from 210deg, #7eb7aa, #b98c45, #b78ea5, #7e96bc, #7eb7aa);
+  cursor: pointer;
+  transition: transform 0.5s var(--ease);
+}
+
+.avatar:hover {
+  transform: scale(1.06) rotate(-4deg);
+}
+
+.identity__name {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.identity__sub {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+}
+
+.bubble {
+  position: absolute;
+  left: calc(100% + 0.65rem);
+  top: -0.1rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 0.9rem 0.9rem 0.9rem 0.15rem;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 0.7rem;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(5px) scale(0.94);
+  transform-origin: 0 100%;
+  pointer-events: none;
+  transition: opacity 0.3s var(--ease), transform 0.35s var(--ease);
+  z-index: 5;
+}
+
+.bubble[data-shown="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(2.6rem, 8.5vw, 5.6rem);
+  /* 0.92 matched the reference, but the highlight band has to be tall enough to
+     contain descenders (see .spark) and at 0.92 the two lines' bands collide.
+     leading must exceed the band (1.06em) or the two lines' bands merge. */
+  line-height: 1.12;
+  /* balance the two lines rather than letting the last word strand */
+  text-wrap: balance;
+  font-weight: 500;
+  letter-spacing: -0.045em;
+}
+
+.title__line {
+  display: block;
+}
+
+/* word-by-word reveal with a blur lift, as in the reference */
+.word {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(4px);
+  transform: translateY(0.4em);
+  transition: opacity 480ms var(--ease), transform 480ms var(--ease),
+    filter 480ms var(--ease);
+}
+
+.word + .word {
+  margin-left: 0.26em;
+}
+
+.word[data-visible="true"] {
+  opacity: 1;
+  filter: blur(0);
+  transform: none;
+}
+
+/* Creative spark: a highlighter swipe behind chosen words. Animating
+   background-size (not a pseudo-element) keeps the text above the band with no
+   z-index or clipping games. Lights slightly after the word lands. */
+.spark {
+  color: var(--ink-strong);
+  background-color: transparent;
+  /* A solid slab wiped in left-to-right with the word knocked out of it.
+     background-size does the wipe so the block always paints behind the glyphs —
+     no pseudo-element, so no z-index/stacking-context traps. */
+  background-image: linear-gradient(var(--ink-strong), var(--ink-strong));
+  background-repeat: no-repeat;
+  background-position: 0 50%;
+  /* CRITICAL: the band must cover the full glyph extent, not just the x-height.
+     `color` is flipped for the whole word, so any pixel falling outside the band
+     is knocked-out ink on a knocked-out background — i.e. invisible. Inter
+     Tight's full extent (ascender to p/g descender) is ~0.95em, so 1.06em
+     centred clears it with margin — and stays under the line-height below so
+     the two bands never merge. */
+  background-size: 0% 1.06em;
+  padding-inline: 0.1em;
+  border-radius: 0;
+  /* colour flips partway through the wipe, so glyphs go light just as the slab
+     reaches them */
+  transition: background-size 420ms var(--ease) 140ms,
+    color 200ms var(--ease) 300ms;
+}
+
+.spark[data-lit="true"] {
+  color: var(--bg);
+  background-size: 100% 1.06em;
+}
+
+/* the pokeable mark that bursts skill pills */
+.burst-slot {
+  margin-inline-start: 0.22em;
+  display: inline-grid;
+  place-items: center;
+  width: 0.92em;
+  height: 0.92em;
+  margin: 0 0.12em;
+  vertical-align: -0.06em;
+  border-radius: 0.26em;
+  background: conic-gradient(from 210deg, #7eb7aa, #b98c45, #b78ea5, #7e96bc, #7eb7aa);
+  cursor: pointer;
+  transition: transform 0.5s var(--ease);
+}
+
+.burst-slot:hover {
+  transform: rotate(8deg) scale(1.08);
+}
+
+.burst-slot:active {
+  transform: scale(0.92);
+}
+
+/* lifts the stack cloud off the page it's covering, on mobile only */
+.pill-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 29;
+  /* tappable: dismisses early rather than making you wait it out */
+  pointer-events: auto;
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  backdrop-filter: blur(3px);
+}
+
+/* names the panel, so the cloud reads as a deliberate answer to the tap */
+.pill-scrim__cap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% - 5.5rem);
+  text-align: center;
+  color: var(--ink-faint);
+}
+
+.pill {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 30;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg-raised);
+  color: var(--ink-muted);
+  font-size: 0.74rem;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 31;
+  will-change: transform, opacity;
+}
+
+.home__blurb {
+  margin: 2.25rem 0 0;
+  max-width: var(--summary-width);
+  color: var(--ink-muted);
+  font-size: 1.02rem;
+}
+
+/* ------------------------------------------------------- mobile launcher */
+/* Desktop keeps the dock; the grid AND its section header only exist below the
+   breakpoint. Both need the base hide — styling the header only inside the
+   media query left it rendering on desktop, labelling a hidden grid. */
+.launcher,
+.m-sect {
+  display: none;
+}
+
+
+/* --------------------------------------------------------------- panels */
+.panel {
+  min-height: 100svh;
+  /* Back is fixed and out of flow, so the content needs clearance beneath it
+     (pill sits at top:56px, ~32px tall). */
+  padding: var(--space-2xl) 0 14rem;
+}
+
+/* Back is fixed and proximity-driven (see BackButton.tsx). The spring easing
+   is what makes it rubber-band: it overshoots its resting position and settles,
+   so it reads as an object arriving rather than a panel fading in. */
+.back {
+  position: fixed;
+  left: max(1.5rem, calc((100vw - var(--content-width)) / 2));
+  z-index: 30;
+  transition: transform 0.62s cubic-bezier(0.18, 1.4, 0.4, 1),
+    opacity 0.28s var(--ease);
+}
+
+.back[data-dock="top"] {
+  top: 56px;
+  bottom: auto;
+}
+
+.back[data-dock="bottom"] {
+  top: auto;
+  bottom: 40px;
+}
+
+/* off-stage in the direction it will arrive from */
+.back[data-shown="false"] {
+  opacity: 0;
+}
+
+/* Deliberately still focusable while hidden: the dock is gone on a panel, so
+   Back plus Escape are the only exits. Tabbing to it reveals it (see the
+   onFocus handler) rather than clicking an invisible target. */
+.back[data-shown="false"] .chip {
+  pointer-events: none;
+}
+
+.back:focus-within {
+  opacity: 1;
+  transform: none;
+}
+
+.back[data-dock="top"][data-shown="false"] {
+  transform: translateY(calc(-56px - 100%));
+}
+
+.back[data-dock="bottom"][data-shown="false"] {
+  transform: translateY(calc(40px + 100%));
+}
+
+.back[data-shown="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+.back .chip {
+  height: 2rem;
+  padding: 0 0.75rem 0 0.6rem;
+  font-size: 0.78rem;
+  background: color-mix(in srgb, var(--bg-raised) 55%, transparent);
+  backdrop-filter: blur(10px) saturate(var(--glass-saturation));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .back {
+    transition: opacity 0.2s linear;
+  }
+  .back[data-shown="false"] {
+    transform: none;
+  }
+}
+
+/* the opening line runs big and full-width, then the rest drops to the
+   reading measure — reference lead is 31px on 35.4px (ratio 1.14) */
+.panel__lead {
+  margin: var(--space-md) 0 var(--space-lg);
+  font-size: clamp(1.35rem, 2.2vw, 1.94rem);
+  line-height: 1.14;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+/* shared project mark — dock, library rows, panel header all draw the same face */
+.pmark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  border-radius: 23.5%;
+  overflow: hidden;
+  color: #fff;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.2) inset,
+    0 6px 16px -10px rgb(0 0 0 / 0.7);
+}
+
+.pmark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pmark svg {
+  width: 46%;
+  height: 46%;
+}
+
+.pmark .pmark__glyph {
+  width: 52%;
+  height: 52%;
+  object-fit: contain;
+}
+
+.pmark[data-icon="relayhelp"] {
+  color: #ce203a;
+  background-color: #fff;
+}
+
+:root[data-theme="dark"] .pmark[data-icon="relayhelp"] {
+  color: #ecd6ae;
+  background-color: #1a1917;
+}
+
+.pmark[data-icon="relayhelp"] svg {
+  width: 78%;
+  height: 78%;
+}
+
+.pmark--lg {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 1.35rem;
+}
+
+.panel__id {
+  display: flex;
+  align-items: center;
+  gap: 1.15rem;
+  margin-bottom: 0.25rem;
+}
+
+.panel__kicker {
+  margin: 0 0 0.85rem;
+}
+
+.panel__title {
+  margin: 0;
+  font-size: clamp(2.2rem, 6.5vw, 4.2rem);
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+
+.panel__meta {
+  margin: 1rem 0 0;
+  color: var(--ink-muted);
+  font-size: 0.92rem;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  margin: 2.75rem 0;
+  background: var(--rule-strong);
+  border: 1px solid var(--rule-strong);
+  border-radius: 0.9rem;
+  overflow: hidden;
+}
+
+.stat {
+  flex: 1 1 9.5rem;
+  background: var(--bg-raised);
+  padding: 1.15rem 1.1rem;
+}
+
+.stat__value {
+  font-size: 1.35rem;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.stat__label {
+  margin-top: 0.35rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.68rem;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.prose p {
+  margin: 0 0 1.15rem;
+  max-width: var(--summary-width);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--ink-soft);
+}
+
+/* index rows, lifted from rajavijayaraman.com: flex row, space-between,
+   baselines aligned, mono meta on the right, hairline rule underneath.
+   no cards, no shadows, no images. */
+.index-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: var(--space-md);
+}
+
+.index-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.32rem 0.7rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  background: none;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: color 0.25s var(--ease), border-color 0.25s var(--ease),
+    background-color 0.25s var(--ease);
+}
+
+.index-filter:hover {
+  color: var(--ink-strong);
+  border-color: var(--ink-muted);
+}
+
+.index-filter[data-on="true"] {
+  color: var(--bg);
+  background: var(--ink-strong);
+  border-color: var(--ink-strong);
+}
+
+.index-filter__n {
+  opacity: 0.6;
+}
+
+.index-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr;
+  margin: var(--space-md) 0 0;
+  padding: 0;
+  max-width: 820px;
+}
+
+.index-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--rule);
+  transition: opacity 0.3s var(--ease);
+}
+
+.index-list li:last-child .index-link {
+  border-bottom: 0;
+}
+
+.index-link:hover {
+  opacity: 1;
+}
+
+.index-list:hover .index-link:not(:hover) {
+  opacity: 0.48;
+}
+
+.index-text {
+  min-width: 0;
+  flex: 1;
+}
+
+/* the project's own dock face, small, so the library and the dock read as one
+   set of things rather than a list that happens to share names */
+.index-mark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.1rem;
+  height: 2.1rem;
+  margin-right: 0.9rem;
+  border-radius: 23.5%;
+  overflow: hidden;
+  color: #fff;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.6rem;
+  font-weight: 600;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.2) inset,
+    0 4px 10px -7px rgb(0 0 0 / 0.7);
+  transition: transform 0.35s var(--ease);
+}
+
+/* keeps the column aligned for projects that have no mark yet */
+.index-mark--none {
+  background: none;
+  box-shadow: none;
+  border: 1px dashed var(--rule);
+}
+
+.index-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.index-mark svg {
+  width: 46%;
+  height: 46%;
+}
+
+/* RelayHelp's mark carries its own frame and internal padding — it needs the
+   same 78% here that it gets in the dock, or it reads as shrunken. */
+.index-mark[data-icon="relayhelp"] svg {
+  width: 78%;
+  height: 78%;
+}
+
+.index-mark[data-icon="relayhelp"] {
+  background-color: #fff;
+  color: #ce203a;
+}
+
+:root[data-theme="dark"] .index-mark[data-icon="relayhelp"] {
+  background-color: #1a1917;
+  color: #ecd6ae;
+}
+
+.index-link:hover .index-mark {
+  transform: scale(1.08) rotate(-2deg);
+}
+
+.index-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1.02rem;
+  color: var(--ink-strong);
+}
+
+.index-title::after {
+  content: "→";
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+}
+
+.index-link:hover .index-title::after {
+  opacity: 0.5;
+  transform: none;
+}
+
+.index-blurb {
+  display: block;
+  margin: 0.15rem 0 0;
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+}
+
+.index-meta {
+  flex: none;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.7rem;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------- 3D interactive showcase */
+/* The CASE is a static shelf; only the device inside tilts. Perspective lives
+   on the tilt wrapper so the rotation is about the device's own centre. */
+.site3d {
+  margin: var(--space-lg) 0 var(--space-md);
+  max-width: 880px;
+}
+
+.site3d__case {
+  position: relative;
+  border-radius: 1.5rem;
+  padding: clamp(1rem, 3vw, 2.2rem);
+  border: 1px solid var(--rule);
+  background:
+    linear-gradient(150deg,
+      color-mix(in srgb, var(--brand) 22%, transparent),
+      color-mix(in srgb, var(--brand) 5%, transparent) 60%,
+      transparent);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.3) inset,
+    0 40px 80px -55px rgb(0 0 0 / 0.55);
+  backdrop-filter: blur(6px) saturate(130%);
+}
+
+.site3d__tilt {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+.site3d__device {
+  display: block;
+  position: relative;
+  border-radius: 0.85rem;
+  overflow: hidden;
+  background: var(--bg-raised);
+  border: 1px solid var(--rule-strong);
+  box-shadow: 0 24px 50px -30px rgb(0 0 0 / 0.5);
+  transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transform-style: preserve-3d;
+  transition: transform 0.9s cubic-bezier(0.16, 1.3, 0.35, 1),
+    box-shadow 0.4s var(--ease);
+  cursor: none;
+}
+
+.site3d__tilt[data-active="true"] .site3d__device {
+  transition: transform 0.12s linear, box-shadow 0.4s var(--ease);
+  box-shadow: 0 34px 60px -30px rgb(0 0 0 / 0.6);
+}
+
+/* browser chrome doubles as the link affordance */
+.site3d__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.6rem 0.8rem;
+  background: color-mix(in srgb, var(--ink-strong) 6%, var(--bg-raised));
+  border-bottom: 1px solid var(--rule);
+  transform: translateZ(18px);
+}
+
+.site3d__bar > span:not(.site3d__url) {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--rule-strong);
+  flex: none;
+}
+
+.site3d__url {
+  flex: 1;
+  margin-left: 0.5rem;
+  padding: 0.24rem 0.65rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink-strong) 5%, transparent);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.02em;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.3s var(--ease), background-color 0.3s var(--ease);
+}
+
+.site3d__go {
+  flex: none;
+  margin-left: 0.4rem;
+  color: var(--ink-faint);
+  opacity: 0;
+  transform: translate(-3px, 3px);
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+}
+
+a.site3d__device:hover .site3d__url,
+a.site3d__device:focus-visible .site3d__url {
+  color: var(--ink-strong);
+  background: color-mix(in srgb, var(--brand) 16%, transparent);
+}
+
+a.site3d__device:hover .site3d__go,
+a.site3d__device:focus-visible .site3d__go {
+  opacity: 1;
+  transform: none;
+}
+
+a.site3d__device:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}
+
+.site3d__screen {
+  aspect-ratio: 16 / 9;
+  display: block;
+  transform: translateZ(6px);
+}
+
+/* direct child only: the placeholder mark is also an <img> in here */
+.site3d__screen > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.site3d__placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background:
+    radial-gradient(120% 120% at 50% 20%,
+      color-mix(in srgb, var(--brand) 20%, transparent), transparent 70%),
+    var(--bg-raised);
+}
+
+.site3d__mark {
+  width: 84px;
+  height: 84px;
+  border-radius: 1.35rem;
+  box-shadow: 0 14px 30px -18px rgb(0 0 0 / 0.7);
+}
+
+.site3d__initial {
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  border-radius: 1.35rem;
+  background: var(--brand);
+  color: #fff;
+  font-family: var(--font-mono), monospace;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.site3d__pending {
+  color: var(--ink-faint);
+}
+
+.site3d__glare {
+  position: absolute;
+  inset: 0;
+  transform: translateZ(40px);
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(115deg, transparent 32%,
+    rgb(255 255 255 / 0.2) 47%, transparent 62%);
+  transition: opacity 0.4s var(--ease);
+}
+
+.site3d__tilt[data-active="true"] .site3d__glare {
+  opacity: 1;
+}
+
+.site3d__caption {
+  margin-top: 0.8rem;
+  text-align: right;
+}
+
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .site3d__device {
+    transform: none !important;
+    transition: none;
+  }
+  .site3d__glare {
+    display: none;
+  }
+  .site3d__go {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* toggle sits on the case, not the device, so it never tilts away from you */
+.site3d__toggle {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  z-index: 2;
+  height: 1.8rem;
+  padding: 0 0.6rem;
+  gap: 0.3rem;
+  font-size: 0.68rem;
+}
+
+/* 3D off: park it flat and hand the pointer back, so it reads as a plain link */
+.site3d__case[data-interactive="false"] .site3d__device {
+  transform: none;
+  cursor: pointer;
+}
+
+.site3d__case[data-interactive="false"] .site3d__glare {
+  display: none;
+}
+
+.site3d__screen iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  background: var(--bg-raised);
+}
+
+/* iPhone 17 Pro Max: 1320×2868 native, so 0.4603 aspect. Narrow column, thick
+   black bezel, Dynamic Island cut into the top of the screen. */
+.site3d[data-device="phone"] .site3d__case {
+  display: flex;
+  justify-content: center;
+}
+
+.site3d[data-device="phone"] .site3d__tilt {
+  width: min(300px, 72vw);
+}
+
+.site3d[data-device="phone"] .site3d__device {
+  position: relative;
+  aspect-ratio: 1320 / 2868;
+  border-radius: 2.6rem;
+  /* --bezel drives both the inset and the inner radius, so the corners stay
+     concentric and the frame is even on all four sides */
+  --bezel: 9px;
+  padding: var(--bezel);
+  background: linear-gradient(160deg, #3a3a3c, #1c1c1e 40%, #000 100%);
+  border: 0;
+  box-shadow: 0 0 0 1.5px rgb(255 255 255 / 0.14) inset,
+    0 30px 60px -30px rgb(0 0 0 / 0.7);
+}
+
+/* Was height:100% — a percentage height against a parent sized by aspect-ratio
+   resolves unreliably, and the screen spilled past the bottom bezel. Pinning to
+   the inset guarantees an even frame. */
+.site3d[data-device="phone"] .site3d__screen {
+  position: absolute;
+  inset: var(--bezel);
+  aspect-ratio: auto;
+  height: auto;
+  border-radius: calc(2.6rem - var(--bezel));
+  overflow: hidden;
+  transform: translateZ(4px);
+}
+
+.site3d__island {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateZ(12px);
+  width: 33%;
+  height: 22px;
+  border-radius: 999px;
+  background: #000;
+  z-index: 2;
+}
+
+/* laptop: browser chrome plus a base, so it reads as a machine on a desk */
+.site3d[data-device="laptop"] .site3d__device::after {
+  content: "";
+  position: absolute;
+  left: -7%;
+  right: -7%;
+  bottom: -13px;
+  height: 13px;
+  border-radius: 0 0 0.6rem 0.6rem;
+  background: linear-gradient(180deg, #d7d7da, #a8a8ad);
+  box-shadow: 0 8px 18px -10px rgb(0 0 0 / 0.6);
+}
+
+.site3d[data-device="laptop"] .site3d__case {
+  padding-bottom: calc(clamp(1rem, 3vw, 2.2rem) + 16px);
+}
+
+/* -------------------------------------------------------------- flow steps */
+.flow {
+  margin: var(--space-lg) 0 var(--space-md);
+  max-width: 880px;
+}
+
+.flow__device {
+  border: 1px solid var(--rule-strong);
+  border-radius: 1rem;
+  overflow: hidden;
+  background: var(--bg-raised);
+}
+
+.flow__screen {
+  aspect-ratio: 16 / 9;
+  position: relative;
+}
+
+.flow__screen img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.flow__pending {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: var(--space-md);
+  text-align: center;
+  background:
+    radial-gradient(120% 120% at 50% 15%,
+      color-mix(in srgb, var(--brand) 16%, transparent), transparent 70%),
+    var(--bg-raised);
+  animation: enter 0.4s var(--ease) both;
+}
+
+.flow__num {
+  font-size: 0.68rem;
+  color: color-mix(in srgb, var(--brand) 80%, var(--ink));
+}
+
+.flow__label {
+  font-size: clamp(1.05rem, 2.4vw, 1.5rem);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  max-width: 24ch;
+}
+
+.flow__hint {
+  color: var(--ink-faint);
+}
+
+.flow__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.7rem;
+  border-top: 1px solid var(--rule);
+  background: color-mix(in srgb, var(--ink-strong) 4%, var(--bg-raised));
+}
+
+.flow__ctrl {
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: none;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+
+.flow__ctrl:hover {
+  color: var(--ink-strong);
+  border-color: var(--ink-muted);
+}
+
+.flow__dots {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.flow__dot {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--rule-strong);
+  cursor: pointer;
+  transition: background-color 0.25s var(--ease), width 0.3s var(--ease);
+}
+
+.flow__dot[data-on="true"] {
+  width: 20px;
+  background: var(--brand);
+}
+
+.flow__cap {
+  margin-top: 0.7rem;
+  color: var(--ink-faint);
+}
+
+/* ------------------------------------------------------------- case study */
+.cs {
+  margin: var(--space-xl) 0;
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--rule-strong);
+}
+
+.cs__head {
+  margin-bottom: var(--space-lg);
+}
+
+.cs__label {
+  margin: 0 0 0.8rem;
+}
+
+.cs__premise {
+  margin: 0;
+  max-width: 34ch;
+  min-width: min(100%, 44rem);
+  font-size: clamp(1.25rem, 2.6vw, 1.85rem);
+  line-height: 1.25;
+  letter-spacing: -0.028em;
+  color: var(--ink);
+}
+
+.cs__chapters {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cs__chapter {
+  display: grid;
+  grid-template-columns: 3.5rem 1fr;
+  gap: 0 1.5rem;
+  padding-bottom: var(--space-lg);
+}
+
+/* the number column carries a rule down to the next chapter, so the sequence
+   reads as one thread rather than three stacked blocks */
+.cs__marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.cs__num {
+  color: var(--ink-faint);
+}
+
+.cs__rule {
+  flex: 1;
+  width: 1px;
+  background: var(--rule);
+}
+
+.cs__chapter:last-child .cs__rule {
+  display: none;
+}
+
+.cs__chapter-label {
+  margin: 0 0 0.5rem;
+}
+
+.cs__chapter-title {
+  margin: 0 0 1rem;
+  font-size: clamp(1.2rem, 2.2vw, 1.6rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.cs__body {
+  margin: 0 0 1rem;
+  max-width: var(--summary-width);
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--ink-soft);
+}
+
+.cs__content .nv,
+.cs__content .media,
+.cs__content .site3d,
+.cs__content .flow {
+  margin-left: 0;
+  max-width: 640px;
+}
+
+@media (max-width: 700px) {
+  .cs__chapter {
+    grid-template-columns: 1.75rem 1fr;
+    gap: 0 1rem;
+  }
+}
+
+/* --------------------------------------------- showcases for work with no UI */
+.nv {
+  margin: var(--space-lg) 0 var(--space-md);
+  max-width: 880px;
+}
+
+.nv__cap {
+  margin-top: 0.7rem;
+  color: var(--ink-faint);
+  text-align: right;
+}
+
+/* ── terminal ── */
+.nv--term .nv__chrome {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.6rem 0.8rem;
+  background: #1c1b19;
+  border-radius: 1rem 1rem 0 0;
+}
+
+.nv--term .nv__chrome > span:not(.nv__title) {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.16);
+}
+
+.nv__title {
+  margin-left: 0.6rem;
+  color: rgb(255 255 255 / 0.4);
+}
+
+.nv__body {
+  margin: 0;
+  padding: 1.1rem 1.2rem;
+  background: #131211;
+  border-radius: 0 0 1rem 1rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.78rem;
+  line-height: 1.7;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+.nv__line {
+  display: block;
+}
+
+.nv__line + .nv__line {
+  margin-top: 0.15rem;
+}
+
+.nv__comment {
+  display: block;
+  color: rgb(255 255 255 / 0.32);
+  margin-top: 0.6rem;
+}
+
+.nv__cmd {
+  display: block;
+  color: #f2efe8;
+}
+
+.nv__prompt {
+  color: #5ce1b6;
+  user-select: none;
+}
+
+.nv__out {
+  display: block;
+  color: rgb(255 255 255 / 0.55);
+}
+
+/* ── api ── */
+.nv__pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--rule-strong);
+  border: 1px solid var(--rule-strong);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+@media (max-width: 720px) {
+  .nv__pair {
+    grid-template-columns: 1fr;
+  }
+}
+
+.nv__side {
+  background: var(--bg-raised);
+  padding: 1.1rem 1.2rem;
+}
+
+.nv__side-label {
+  margin: 0 0 0.7rem;
+}
+
+.nv__endpoint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8rem;
+  color: var(--ink);
+}
+
+.nv__method,
+.nv__status {
+  padding: 0.14rem 0.45rem;
+  border-radius: 0.35rem;
+  background: color-mix(in srgb, var(--ink-strong) 8%, transparent);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+}
+
+.nv__status[data-ok="true"] {
+  background: color-mix(in srgb, #1f9d55 22%, transparent);
+  color: color-mix(in srgb, #1f9d55 80%, var(--ink));
+}
+
+.nv__status[data-ok="false"] {
+  background: color-mix(in srgb, #c2452d 22%, transparent);
+  color: color-mix(in srgb, #c2452d 85%, var(--ink));
+}
+
+.nv__note {
+  color: var(--ink-faint);
+  font-size: 0.72rem;
+}
+
+.nv__json {
+  margin: 0.8rem 0 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.72rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  overflow-x: auto;
+}
+
+/* ── chat ── */
+.nv__thread {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.3rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 1rem;
+  background: var(--bg-raised);
+}
+
+.nv__msg {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-width: 82%;
+}
+
+.nv__msg[data-from="user"] {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.nv__bubble {
+  padding: 0.6rem 0.9rem;
+  border-radius: 1.1rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.nv__msg[data-from="user"] .nv__bubble {
+  background: var(--ink-strong);
+  color: var(--bg);
+  border-bottom-right-radius: 0.3rem;
+}
+
+.nv__msg[data-from="bot"] .nv__bubble {
+  background: color-mix(in srgb, var(--ink-strong) 7%, transparent);
+  color: var(--ink);
+  border-bottom-left-radius: 0.3rem;
+}
+
+/* a tool call isn't speech — it's the machinery, so it reads as a note */
+.nv__msg[data-from="tool"] {
+  align-self: center;
+  max-width: 100%;
+}
+
+.nv__msg[data-from="tool"] .nv__bubble {
+  background: none;
+  border: 1px dashed var(--rule-strong);
+  border-radius: 0.6rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+}
+
+.nv__msg-meta {
+  color: var(--ink-faint);
+}
+
+/* ── architecture ── */
+.nv__tiers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.75rem;
+  padding: 1.4rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 1rem;
+  background: var(--bg-raised);
+}
+
+.nv__tier {
+  position: relative;
+}
+
+.nv__tier-label {
+  margin: 0 0 0.6rem;
+}
+
+.nv__nodes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.nv__node {
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--rule-strong);
+  border-left: 3px solid color-mix(in srgb, var(--brand) 70%, transparent);
+  border-radius: 0.5rem;
+  background: var(--bg);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.nv__arrow {
+  position: absolute;
+  top: 50%;
+  right: -0.55rem;
+  color: var(--ink-faint);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 700px) {
+  .nv__arrow {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------ other media */
+.media {
+  margin: var(--space-lg) 0 var(--space-md);
+  max-width: 880px;
+}
+
+.media__frame {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: block;
+  border: 1px solid var(--rule-strong);
+  border-radius: 1rem;
+  background: var(--bg-raised);
+}
+
+.media[data-kind="figma"] .media__frame {
+  aspect-ratio: 4 / 3;
+}
+
+.media__pending {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px dashed var(--rule-strong);
+  border-radius: 1rem;
+  color: var(--ink-faint);
+  background: color-mix(in srgb, var(--bg-raised) 60%, transparent);
+}
+
+.media__cap {
+  margin-top: 0.7rem;
+  color: var(--ink-faint);
+}
+
+.media__brand {
+  border: 1px solid var(--rule);
+  border-radius: 1rem;
+  padding: var(--space-md);
+  background: linear-gradient(150deg,
+    color-mix(in srgb, var(--brand) 14%, transparent), transparent 65%);
+}
+
+.media__swatches {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.media__swatches span {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.7rem;
+  border: 1px solid var(--rule);
+}
+
+.media__specimen {
+  margin: var(--space-sm) 0 0.25rem;
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+/* ------------------------------------------------------------------ about */
+/* Deliberately not `.panel`: a person shouldn't be laid out like a spec sheet. */
+.about {
+  min-height: 100svh;
+  padding: var(--space-2xl) 0 14rem;
+}
+
+.about__head {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: var(--space-lg);
+}
+
+.about__avatar {
+  width: 5.5rem;
+  height: 5.5rem;
+  flex: none;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(120% 120% at 30% 20%, rgb(255 255 255 / 0.65), transparent 60%),
+    conic-gradient(from 210deg, #7eb7aa, #b98c45, #b78ea5, #7e96bc, #7eb7aa);
+}
+
+.about__name {
+  margin: 0;
+  font-size: clamp(2.4rem, 6vw, 3.8rem);
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+
+.about__role {
+  margin: 0.5rem 0 0;
+}
+
+/* the opening line is a statement, set large and full width */
+.about__statement {
+  margin: 0 0 var(--space-lg);
+  max-width: 20ch;
+  min-width: 100%;
+  font-size: clamp(1.5rem, 3.4vw, 2.4rem);
+  line-height: 1.18;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+/* two columns so the remaining copy reads as prose, not a panel body */
+.about__cols {
+  columns: 2;
+  column-gap: var(--space-lg);
+  max-width: 900px;
+  margin-bottom: var(--space-xl);
+}
+
+.about__cols p {
+  margin: 0 0 1.1rem;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  break-inside: avoid;
+}
+
+@media (max-width: 760px) {
+  .about__cols {
+    columns: 1;
+  }
+}
+
+.about__section {
+  margin-bottom: var(--space-xl);
+}
+
+.about__label {
+  margin: 0 0 var(--space-md);
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.about__links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1px;
+  background: var(--rule-strong);
+  border: 1px solid var(--rule-strong);
+  border-radius: 0.9rem;
+  overflow: hidden;
+}
+
+.about__link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.15rem 1.25rem;
+  background: var(--bg-raised);
+  font-size: 1rem;
+  transition: background-color 0.3s var(--ease), color 0.3s var(--ease);
+}
+
+.about__link:hover {
+  background: var(--ink-strong);
+  color: var(--bg);
+}
+
+/* --------------------------------------------------- expand-on-hover strip */
+.showcase {
+  display: flex;
+  align-items: stretch;
+  gap: 0.35rem;
+  margin: var(--space-lg) 0 var(--space-md);
+  height: 22rem;
+}
+
+.showcase__card {
+  position: relative;
+  /* brand tint over the page, not a pastel gradient — same identity as the dock */
+  background:
+    linear-gradient(155deg,
+      color-mix(in srgb, var(--brand) 88%, transparent),
+      color-mix(in srgb, var(--brand) 55%, transparent));
+  flex: 0 0 5.5rem;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  cursor: pointer;
+  color: #fff;
+  text-align: left;
+  /* the width transition is the whole effect — 500ms matches the original */
+  transition: flex-basis 0.5s var(--ease), box-shadow 0.5s var(--ease);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.3) inset;
+}
+
+.showcase__card[data-expanded="true"] {
+  flex-basis: 24rem;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.4) inset,
+    0 18px 40px -22px rgb(0 0 0 / 0.55);
+}
+
+.showcase__card:focus-visible {
+  outline: 2px solid var(--ink-strong);
+  outline-offset: 3px;
+}
+
+/* collapsed: the name runs vertically up the spine */
+.pmark--card {
+  position: absolute;
+  top: 1.1rem;
+  left: 1.1rem;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 0.8rem;
+  z-index: 2;
+}
+
+.showcase__spine {
+  position: absolute;
+  left: 50%;
+  bottom: 1.25rem;
+  transform: translateX(-50%) rotate(180deg);
+  writing-mode: vertical-rl;
+  font-size: 0.85rem;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  opacity: 1;
+  transition: opacity 0.3s var(--ease);
+}
+
+.showcase__card[data-expanded="true"] .showcase__spine {
+  opacity: 0;
+}
+
+/* expanded: the real content fades up */
+.showcase__body {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.5rem;
+  width: 24rem;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.35s var(--ease) 0.12s, transform 0.45s var(--ease) 0.12s;
+}
+
+.showcase__card[data-expanded="true"] .showcase__body {
+  opacity: 1;
+  transform: none;
+}
+
+.showcase__kicker {
+  color: rgb(255 255 255 / 0.7);
+}
+
+.showcase__title {
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.showcase__blurb {
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: rgb(255 255 255 / 0.82);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Narrow screens can't fit five cards plus a 24rem expansion, and hover is
+   meaningless on touch — so it becomes a plain scrollable row of open cards. */
+@media (max-width: 860px), (hover: none) {
+  .showcase {
+    height: auto;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    gap: 0.75rem;
+  }
+  .showcase::-webkit-scrollbar {
+    display: none;
+  }
+  .showcase__card,
+  .showcase__card[data-expanded="true"] {
+    flex: 0 0 min(19rem, 78vw);
+    height: 17rem;
+    scroll-snap-align: start;
+  }
+  .showcase__spine {
+    display: none;
+  }
+  .showcase__body {
+    width: 100%;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 2rem;
+}
+
+.tag {
+  padding: 0.28rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+}
+
+.outlinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-top: 2.25rem;
+}
+
+.outlink {
+  position: relative;
+  font-size: 0.92rem;
+}
+
+.outlink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: 100% 50%;
+  transition: transform 0.4s var(--ease);
+}
+
+.outlink:hover::after {
+  transform: scaleX(1);
+  transform-origin: 0 50%;
+}
+
+/* --------------------------------------------------------------- dock */
+.dock {
+  position: fixed;
+  left: 50%;
+  bottom: 2rem;
+  transform: translateX(-50%);
+  z-index: 20;
+}
+
+.dock__glass {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 10px;
+  border-radius: 22px;
+  background-color: var(--glass-plate);
+  backdrop-filter: blur(10px) url(#dock-glass) saturate(var(--glass-saturation));
+  -webkit-backdrop-filter: blur(10px) saturate(var(--glass-saturation));
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--glass-light) calc(var(--glass-reflex-light) * 12%), transparent),
+    inset 1.6px 2.4px 0 -1.6px color-mix(in srgb, var(--glass-light) calc(var(--glass-reflex-light) * 82%), transparent),
+    inset -1.4px -1.8px 0 -1.4px color-mix(in srgb, var(--glass-light) calc(var(--glass-reflex-light) * 66%), transparent),
+    inset -0.4px -1px 4px 0 color-mix(in srgb, var(--glass-dark) calc(var(--glass-reflex-dark) * 12%), transparent),
+    inset 0 2px 3px -1px color-mix(in srgb, var(--glass-dark) calc(var(--glass-reflex-dark) * 16%), transparent),
+    0 12px 28px 0 color-mix(in srgb, var(--glass-dark) calc(var(--glass-reflex-dark) * 10%), transparent);
+}
+
+.dock__glass::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.62;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--glass-light) calc(var(--glass-reflex-light) * 54%), transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--glass-dark) calc(var(--glass-reflex-dark) * 6%), transparent);
+}
+
+.dock__track {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--dock-gap);
+  height: var(--dock-size);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dock__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--dock-size);
+  height: var(--dock-size);
+  transition: width 0.45s var(--ease);
+}
+
+/* magnification falloff — hovered item plus two neighbours each side */
+.dock__item[data-mag="hover"] {
+  width: calc(var(--dock-size) * 1.24);
+}
+.dock__item[data-mag="close"] {
+  width: calc(var(--dock-size) * 1.12);
+}
+.dock__item[data-mag="far"] {
+  width: calc(var(--dock-size) * 1.04);
+}
+
+.dock__divider {
+  width: 8px;
+  height: calc(var(--dock-size) * 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  pointer-events: none;
+}
+
+.dock__divider span {
+  width: 1px;
+  height: 100%;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 30%, transparent);
+  box-shadow: 1px 0 0 color-mix(in srgb, #ffffff 32%, transparent);
+}
+
+.dock__link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+}
+
+/* a project's own app icon already has its own background and corner radius —
+   draw it edge to edge and let the tile clip it */
+.dock__tile--art {
+  background: none;
+  padding: 0;
+  overflow: hidden;
+}
+
+.dock__tile--art img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+/* a glyph-only logo sits ON the tile, contained — never cropped like an app icon */
+.dock__glyph {
+  width: 50%;
+  height: 50%;
+  object-fit: contain;
+  display: block;
+}
+
+.index-glyph {
+  width: 52% !important;
+  height: 52% !important;
+  object-fit: contain !important;
+}
+
+.dock__tile svg {
+  width: 46%;
+  height: 46%;
+  display: block;
+}
+
+/* RelayHelp ships a red mark and a cream one. Red-on-white is how the brand
+   presents the icon; the cream pair is its dark counterpart, so the tile
+   inverts with the theme rather than the mark simply changing colour. */
+.dock__tile[data-icon="relayhelp"] {
+  color: #ce203a;
+  background-color: #fff !important;
+}
+
+:root[data-theme="dark"] .dock__tile[data-icon="relayhelp"] {
+  color: #ecd6ae;
+  background-color: #1a1917 !important;
+}
+
+/* the full mark carries its own generous internal margin */
+.dock__tile[data-icon="relayhelp"] svg {
+  width: 78%;
+  height: 78%;
+}
+
+.dock__tile {
+  /* default mark colour; per-brand overrides below can beat this */
+  color: #fff;
+  display: grid;
+  place-items: center;
+  width: var(--dock-size);
+  height: var(--dock-size);
+  border-radius: var(--dock-radius);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.22) inset,
+    0 -1px 0 rgb(0 0 0 / 0.16) inset,
+    0 8px 18px -12px rgb(0 0 0 / 0.6);
+  transition: filter 0.3s ease, transform 0.12s ease-out;
+}
+
+.dock__link:hover .dock__tile,
+.dock__link:focus-visible .dock__tile {
+  filter: saturate(1.08) brightness(1.03);
+}
+
+.dock__link:active .dock__tile {
+  transform: scale(0.93);
+}
+
+.dock__link[aria-current="true"] .dock__tile {
+  filter: saturate(1.06) brightness(1.02);
+}
+
+/* the little dot under the open view, like a running app */
+.dock__link[aria-current="true"]::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 70%, transparent);
+}
+
+.dock__label {
+  position: absolute;
+  bottom: calc(100% + 18px);
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 88%, transparent);
+  color: var(--bg);
+  font-size: 0.7rem;
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+  transition: opacity 150ms var(--ease), transform 150ms var(--ease);
+}
+
+.dock__item:hover .dock__label,
+.dock__item:focus-within .dock__label {
+  opacity: 1;
+  transform: translateY(-8px);
+}
+
+@media (max-width: 640px) {
+  :root {
+    --dock-size: 44px;
+  }
+  .dock {
+    bottom: 1rem;
+  }
+  .dock__glass {
+    max-width: calc(100vw - 1.5rem);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .dock__glass::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------- curtain */
+.curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  /* Start at blur(0) rather than `none` so the frost can interpolate — going
+     from `none` snaps, which is what made the blur read as a separate event
+     landing before the sweep. Now it ramps in alongside the wave. */
+  backdrop-filter: blur(0px) saturate(100%);
+  transition: backdrop-filter 260ms var(--ease);
+}
+
+/* The blur is the thing you notice before the wave even moves. The overlay is
+   inset:0, so the whole viewport goes soft the instant the curtain activates —
+   the tinted path then sweeps up over an already-blurred page. Measured on the
+   reference: blur is live at t≈140ms, the path doesn't start rising until ~420ms. */
+.curtain[data-on="true"] {
+  visibility: visible;
+}
+
+.curtain[data-on="true"][data-frost="true"] {
+  /* Don't hand-write the -webkit- prefix: Lightning CSS then collapses the pair
+     to webkit-only and the standard property never ships. Declare the standard
+     one alone and let the build add prefixes, as the .chip/.dock rules do. */
+  backdrop-filter: blur(22px) saturate(160%);
+}
+
+.curtain svg {
+  width: 100%;
+  height: 100%;
+}
+
+.glass-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------- motion */
+/* Translate only — deliberately NO opacity fade. The curtain's own fade is the
+   reveal; fading the text as well meant it sat half-transparent over a light
+   page for ~300ms after the curtain had gone, which made it unreadable. */
+.enter > * {
+  animation: enter 0.5s var(--ease) both;
+}
+.enter > *:nth-child(1) { animation-delay: 0.04s; }
+.enter > *:nth-child(2) { animation-delay: 0.09s; }
+.enter > *:nth-child(3) { animation-delay: 0.14s; }
+.enter > *:nth-child(4) { animation-delay: 0.19s; }
+.enter > *:nth-child(5) { animation-delay: 0.24s; }
+.enter > *:nth-child(6) { animation-delay: 0.29s; }
+.enter > *:nth-child(7) { animation-delay: 0.34s; }
+
+@keyframes enter {
+  from {
+    transform: translateY(14px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/* content arrives from the opposite side when you're retreating, so the whole
+   movement reads as a reversal rather than the same entrance played twice */
+body[data-dir="back"] .enter > * {
+  animation-name: enter-back;
+}
+
+@keyframes enter-back {
+  from {
+    transform: translateY(-14px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE
+   Not the desktop layout squeezed — a different composition of the same
+   material. Three ideas carry it:
+     1. the display type is the hero and gets bigger, not smaller
+     2. every region is a labelled section with a hairline rule, so the page
+        has structure instead of being evenly-stacked blocks
+     3. nothing floats: the launcher and the masthead are anchored units
+   ═════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 720px) {
+  .shell {
+    max-width: none;
+    padding: 0 1.35rem;
+  }
+
+  /* Both the header (top) and Back (bottom) are position:fixed, so every
+     scrolling region needs clearance or content slides underneath them. This
+     was the single biggest structural problem on a small screen. */
+  :root {
+    --chrome-top: 4.25rem;
+    --chrome-bottom: 5rem;
+  }
+
+  /* ── home ──────────────────────────────────────────────────────────── */
+  .home {
+    min-height: auto;
+    padding-block: var(--chrome-top) var(--space-2xl);
+    justify-content: flex-start;
+  }
+
+  .identity {
+    gap: 0.7rem;
+    margin-bottom: var(--space-md);
+  }
+
+  .avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .identity__name {
+    font-size: 0.88rem;
+  }
+
+  .identity__sub {
+    font-size: 0.74rem;
+  }
+
+  /* The one bold element on the page. It was shrunk to 1.95rem to stop the
+     burst tile wrapping; the tile is smaller instead, and the type goes up. */
+  /* The two highlight slabs are meant to sit on two lines and step against
+     each other, as they do on desktop. Measured, the widest line
+     ("Full-stack product" + the burst tile) is 8.2em, so the type is sized to
+     that measure rather than to a viewport percentage — at 11.5vw it was 6%
+     too wide and every line broke in half, scattering the slabs four deep. */
+  .title {
+    font-size: min(3.1rem, calc((100vw - 2.7rem) / 8.45));
+    letter-spacing: -0.05em;
+    text-wrap: nowrap;
+  }
+
+  .burst-slot {
+    width: 0.62em;
+    height: 0.62em;
+    border-radius: 0.2em;
+  }
+
+  .home__blurb {
+    margin-top: var(--space-md);
+    max-width: 32ch;
+    font-size: 0.98rem;
+  }
+
+  /* ── section heads: the structural device the mobile layout leans on ── */
+  .m-sect {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: var(--space-lg) 0 var(--space-md);
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--rule-strong);
+  }
+
+  .m-sect__n {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+  }
+
+  /* ── launcher ──────────────────────────────────────────────────────── */
+  .launcher {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.15rem 0.6rem;
+    margin: 0;
+  }
+
+  .launcher__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.45rem;
+    background: none;
+    border: 0;
+    padding: 0;
+    color: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    /* one orchestrated arrival, staggered by position */
+    animation: enter 0.5s var(--ease) both;
+  }
+
+  .launcher__item:nth-child(1) { animation-delay: 0.02s; }
+  .launcher__item:nth-child(2) { animation-delay: 0.05s; }
+  .launcher__item:nth-child(3) { animation-delay: 0.08s; }
+  .launcher__item:nth-child(4) { animation-delay: 0.11s; }
+  .launcher__item:nth-child(5) { animation-delay: 0.14s; }
+  .launcher__item:nth-child(6) { animation-delay: 0.17s; }
+  .launcher__item:nth-child(7) { animation-delay: 0.20s; }
+  .launcher__item:nth-child(8) { animation-delay: 0.23s; }
+  .launcher__item:nth-child(9) { animation-delay: 0.26s; }
+  .launcher__item:nth-child(10) { animation-delay: 0.29s; }
+
+  .launcher__tile {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 26%;
+    overflow: hidden;
+    color: #fff;
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.22) inset,
+      0 8px 16px -10px rgb(0 0 0 / 0.65);
+    transition: transform 0.18s var(--ease);
+  }
+
+  .launcher__item:active .launcher__tile {
+    transform: scale(0.9);
+  }
+
+  .launcher__tile--art { background: none; }
+
+  .launcher__tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .launcher__tile svg { width: 46%; height: 46%; }
+
+  .launcher__glyph {
+    width: 50% !important;
+    height: 50% !important;
+    object-fit: contain !important;
+  }
+
+  .launcher__tile[data-icon="relayhelp"] {
+    background-color: #fff !important;
+    color: #ce203a;
+  }
+  .launcher__tile[data-icon="relayhelp"] svg { width: 78%; height: 78%; }
+  :root[data-theme="dark"] .launcher__tile[data-icon="relayhelp"] {
+    background-color: #1a1917 !important;
+    color: #ecd6ae;
+  }
+
+  .launcher__label {
+    font-size: 0.66rem;
+    line-height: 1.15;
+    text-align: center;
+    color: var(--ink-muted);
+  }
+
+  .dock { display: none; }
+  .dock__label { display: none; }
+
+  /* ── panels ────────────────────────────────────────────────────────── */
+  .panel,
+  .about {
+    /* min-height:100svh left short panels (Undecided, Pulse) as a title marooned
+       above half a screen of nothing. Let them be as tall as their content. */
+    min-height: 0;
+    padding-block: var(--chrome-top) var(--chrome-bottom);
+  }
+
+  /* the About head put the avatar beside a two-line mono role that broke
+     mid-phrase; stacked, it gets the full width */
+  .about__head {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+
+  .about__avatar {
+    width: 3.4rem;
+    height: 3.4rem;
+    flex: none;
+  }
+
+  .about__name {
+    font-size: 1.6rem;
+    line-height: 1.05;
+  }
+
+  .about__role {
+    margin-top: 0.35rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+  }
+
+  /* The mark used to sit beside the title, squeezing it into a narrow gutter
+     so it wrapped three deep. Stacked, the title gets the full measure. */
+  .panel__id {
+    display: block;
+  }
+
+  .pmark--lg {
+    width: 3.1rem;
+    height: 3.1rem;
+    margin-bottom: var(--space-sm);
+  }
+
+  .panel__kicker {
+    margin-bottom: 0.5rem;
+  }
+
+  .panel__title {
+    font-size: clamp(2.1rem, 10vw, 2.9rem);
+    letter-spacing: -0.045em;
+    line-height: 1.02;
+  }
+
+  .panel__meta {
+    margin-top: 0.7rem;
+    font-size: 0.85rem;
+  }
+
+  /* the boxed band is heavy on a narrow screen; inline figures read faster */
+  .stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: var(--space-md) 0;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    overflow: visible;
+  }
+
+  .stat {
+    flex: 0 1 auto;
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    padding: 0.4rem 0.7rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: 999px;
+    background: none;
+  }
+
+  .stat__value {
+    font-size: 0.88rem;
+  }
+
+  .stat__label {
+    margin-top: 0;
+    font-size: 0.6rem;
+  }
+
+  .panel__lead {
+    margin: var(--space-md) 0 var(--space-md);
+    font-size: clamp(1.15rem, 4.6vw, 1.45rem);
+    line-height: 1.25;
+  }
+
+  .prose p,
+  .home__blurb {
+    max-width: none;
+  }
+
+  .prose p {
+    font-size: 0.97rem;
+    line-height: 1.6;
+  }
+
+  /* ── library rows ──────────────────────────────────────────────────── */
+  .index-filters { gap: 0.35rem; }
+  .index-meta { display: none; }
+
+  .index-link {
+    gap: 0.85rem;
+    padding: 0.9rem 0;
+  }
+
+  .index-mark {
+    width: 2.4rem;
+    height: 2.4rem;
+    margin-right: 0;
+  }
+
+  /* A dashed box reads as a broken image. Projects without a mark get a plain
+     indent that keeps the column aligned and draws no attention. */
+  .index-mark--none {
+    border: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .index-title { font-size: 0.98rem; }
+  .index-blurb { font-size: 0.85rem; }
+
+  /* ── media ─────────────────────────────────────────────────────────── */
+  .site3d__toggle { display: none; }
+  .site3d__case { padding: 0.8rem; }
+  .site3d, .media, .flow { margin: var(--space-md) 0 var(--space-sm); }
+
+  .showcase { padding-bottom: 0.5rem; }
+
+  .header {
+    padding: 0.75rem 0.9rem;
+    /* a readable plate behind the chips so they never sit on bare display type */
+    background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--bg) 92%, transparent),
+      transparent
+    );
+    left: 0;
+    justify-content: flex-end;
+  }
+
+  /* Back must never dock to the top on a phone: on a short panel it landed
+     directly on the project mark. Bottom-only here, whatever the JS decides —
+     emulators don't always report (hover:none) reliably. */
+  .back,
+  .back[data-dock="top"],
+  .back[data-dock="bottom"] {
+    top: auto;
+    bottom: max(1.25rem, env(safe-area-inset-bottom));
+  }
+
+  .back[data-dock="top"][data-shown="false"],
+  .back[data-dock="bottom"][data-shown="false"] {
+    transform: translateY(calc(1.25rem + 100%));
+  }
+
+  /* It floats over a scrolling list, so translucency reads as a smear across
+     whatever row is behind it. Solid, with a lift, so it's clearly a control. */
+  .back .chip {
+    height: 2.2rem;
+    padding: 0 0.95rem 0 0.8rem;
+    font-size: 0.82rem;
+    background: var(--bg-raised);
+    border-color: var(--rule-strong);
+    box-shadow: 0 6px 20px -8px rgb(0 0 0 / 0.35);
+  }
+
+  /* last rows can clear the floating control */
+  .index-list {
+    padding-bottom: var(--space-lg);
+  }
+}
+
+/* At phone scale the wax fills most of the screen, so the same opacity that
+   reads as atmosphere on a desktop reads as a smudge here. */
+@media (max-width: 720px) {
+  :root { --lava-alpha: 0.09; }
+  :root[data-theme="dark"] { --lava-alpha: 0.11; }
+}
+
+@media (max-width: 400px) {
+  .launcher {
+    gap: 1rem 0.5rem;
+  }
+  .launcher__label { font-size: 0.62rem; }
+}
