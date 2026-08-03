@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { views } from "@/data/site";
+import { useContent } from "@/lib/content-context";
 import { haptic, playTone } from "@/lib/feedback";
 import { ProjectMark } from "./ProjectMark";
 
@@ -28,6 +28,7 @@ const FEATURED = ["relayhelp", "ise", "collabo", "hq", "rdk"];
 const RESTING = 0;
 
 export function ProjectShowcase({ onOpen }: { onOpen: (id: string) => void }) {
+  const { views } = useContent();
   const cards = FEATURED.map((id) => views.find((v) => v.id === id)).filter(
     (v): v is NonNullable<typeof v> => Boolean(v),
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useState } from "react";
-import { dockViews, socials } from "@/data/site";
+import { useContent } from "@/lib/content-context";
 import { playTone, haptic } from "@/lib/feedback";
 import { dockIcons } from "./icons";
 
@@ -39,6 +39,7 @@ export function Dock({
   current: string;
   onSelect: (id: string) => void;
 }) {
+  const { dockViews, socials } = useContent();
   const [active, setActive] = useState<number | null>(null);
 
   const items = [

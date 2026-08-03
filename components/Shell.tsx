@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getView, views } from "@/data/site";
+import { useContent } from "@/lib/content-context";
 import { Curtain, type CurtainHandle } from "./Curtain";
 import { CursorDot } from "./CursorDot";
 import { Dock } from "./Dock";
@@ -41,6 +41,7 @@ function curtainFill(brand: string, dark: boolean) {
  * working, which the reference doesn't bother with.
  */
 export function Shell() {
+  const { views, getView } = useContent();
   const [view, setView] = useState(HOME);
   const curtain = useRef<CurtainHandle>(null);
   /**

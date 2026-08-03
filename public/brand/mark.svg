@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" role="img" aria-label="wavestudio">
+  <!--
+    Rebuilt from the logo artwork as two stroked paths rather than filled
+    outlines. Strokes keep the weight uniform at any size and stay editable;
+    a filled outline bakes the weight into the geometry.
+  -->
+  <g stroke="currentColor" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="8" y="8" width="84" height="84" rx="25" />
+    <!-- one continuous wave: arm, valley, centre peak, valley, arm -->
+    <path d="M 23 40
+             V 64
+             q 0 10.5 9 10.5
+             q 9 0 9 -10.5
+             V 36
+             q 0 -10.5 9 -10.5
+             q 9 0 9 10.5
+             V 64
+             q 0 10.5 9 10.5
+             q 9 0 9 -10.5
+             V 40" />
+  </g>
+</svg>

@@ -1,21 +1,59 @@
 import type { Metadata } from "next";
 import { Inter_Tight, JetBrains_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { DESCRIPTION, SITE_URL, TITLE, personJsonLd } from "@/lib/seo";
 import "./globals.css";
 
 const sans = Inter_Tight({ subsets: ["latin"], variable: "--font-sans" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://wavedidwhat.com"),
-  title: "Wave — full-stack product & creative engineer",
-  description:
-    "Selected products, AI tooling and automation. Built solo, shipped in public.",
-  openGraph: {
-    title: "Wave — full-stack product & creative engineer",
-    description: "Selected products, AI tooling and automation.",
-    url: "https://wavedidwhat.com",
-    type: "website",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: TITLE,
+    template: `%s · ${TITLE}`,
   },
+  description: DESCRIPTION,
+  applicationName: "wavedidwhat",
+  authors: [{ name: "Wave", url: SITE_URL }],
+  creator: "Wave",
+  keywords: [
+    "product engineer",
+    "full-stack developer",
+    "backend engineer",
+    "TypeScript",
+    "Next.js",
+    "Postgres",
+    "developer tooling",
+    "portfolio",
+  ],
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    url: SITE_URL,
+    siteName: "wavedidwhat",
+    title: TITLE,
+    description: DESCRIPTION,
+    locale: "en_GB",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  formatDetection: { telephone: false, address: false, email: false },
 };
 
 /**
@@ -36,6 +74,13 @@ export default function RootLayout({
       </head>
       <body data-view="home" suppressHydrationWarning>
         {children}
+        {/* structured data: lets search engines render an entity, not just a page */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd()) }}
+        />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

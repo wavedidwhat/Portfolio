@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { getView, type Entry } from "@/data/site";
+import type { Entry, View } from "@/data/site";
+import { useContent } from "@/lib/content-context";
 import { dockIcons } from "./icons";
 import { haptic, playTone } from "@/lib/feedback";
 
@@ -17,7 +18,7 @@ import { haptic, playTone } from "@/lib/feedback";
  * dock read as the same set of things.
  */
 /** does this project have a mark of its own? */
-const hasIcon = (v: ReturnType<typeof getView>) =>
+const hasIcon = (v: View | undefined) =>
   Boolean(v && (v.appIcon || v.markSrc || dockIcons[v.id]));
 
 export function IndexList({
@@ -27,6 +28,8 @@ export function IndexList({
   entries: Entry[];
   onOpen: (id: string) => void;
 }) {
+  const { getView } = useContent();
+
   const groups = useMemo(() => {
     const seen: string[] = [];
     for (const e of entries) if (e.group && !seen.includes(e.group)) seen.push(e.group);
@@ -51,7 +54,7 @@ export function IndexList({
       return Boolean(v && (v.appIcon || v.markSrc || dockIcons[v.id]));
     };
     return [...entries].sort((a, b) => Number(hasMark(b)) - Number(hasMark(a)));
-  }, [entries]);
+  }, [entries, getView]);
 
   const shown = filter ? ordered.filter((e) => e.group === filter) : ordered;
 

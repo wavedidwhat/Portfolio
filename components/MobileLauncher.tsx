@@ -1,6 +1,6 @@
 "use client";
 
-import { dockViews, socials } from "@/data/site";
+import { useContent } from "@/lib/content-context";
 import { dockIcons } from "./icons";
 import { haptic } from "@/lib/feedback";
 
@@ -15,6 +15,7 @@ import { haptic } from "@/lib/feedback";
  * living in hover tooltips that touch can never trigger.
  */
 export function MobileLauncher({ onSelect }: { onSelect: (id: string) => void }) {
+  const { dockViews, socials } = useContent();
   const items = [
     ...dockViews.map((v) => ({ ...v, itemKind: "view" as const })),
     ...socials.map((s) => ({ ...s, itemKind: "link" as const })),

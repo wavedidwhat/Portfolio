@@ -1,7 +1,7 @@
 "use client";
 
 import type { View } from "@/data/site";
-import { site } from "@/data/site";
+import { useContent } from "@/lib/content-context";
 import { BackButton } from "./BackButton";
 import { ProjectShowcase } from "./ProjectShowcase";
 
@@ -23,6 +23,7 @@ export function About({
   onBack: () => void;
   onOpen: (id: string) => void;
 }) {
+  const { site } = useContent();
   return (
     <article className="about shell">
       <BackButton onBack={onBack} />

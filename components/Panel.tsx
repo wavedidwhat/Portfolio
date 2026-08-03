@@ -1,6 +1,6 @@
 "use client";
 
-import { getView, type View } from "@/data/site";
+import type { View } from "@/data/site";
 import { haptic } from "@/lib/feedback";
 import { BackButton } from "./BackButton";
 import { IndexList } from "./IndexList";

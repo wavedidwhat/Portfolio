@@ -1,22 +1,23 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
-import { site, skills } from "@/data/site";
+import { useContent } from "@/lib/content-context";
 import { haptic, playTone } from "@/lib/feedback";
 import { MobileLauncher } from "./MobileLauncher";
 
 /** words that get the highlighter slab, matched case- and punctuation-insensitively */
-const lit = new Set(site.highlight.map((w) => w.toLowerCase()));
 const bare = (w: string) => w.replace(/[^\p{L}\p{N}-]/gu, "").toLowerCase();
 
 /** splits a line into words that fade+unblur upward in sequence */
 function StaggerLine({
   text,
+  lit,
   delay = 0,
   step = 100,
 }: {
   text: string;
+  lit: Set<string>;
   delay?: number;
   step?: number;
 }) {
@@ -49,6 +50,11 @@ function StaggerLine({
 }
 
 export function Home({ onSelect }: { onSelect: (id: string) => void }) {
+  const { site, skills } = useContent();
+  const lit = useMemo(
+    () => new Set(site.highlight.map((w) => w.toLowerCase())),
+    [site.highlight],
+  );
   const bubbleRef = useRef<HTMLDivElement>(null);
   const slotRef = useRef<HTMLSpanElement>(null);
   const pillLayer = useRef<HTMLDivElement>(null);
@@ -66,7 +72,7 @@ export function Home({ onSelect }: { onSelect: (id: string) => void }) {
       () => el.setAttribute("data-shown", "false"),
       2200,
     );
-  }, []);
+  }, [site.bubbles]);
 
   useEffect(() => () => window.clearTimeout(hideTimer.current), []);
 
@@ -254,7 +260,7 @@ export function Home({ onSelect }: { onSelect: (id: string) => void }) {
 
       <h1 className="title" id="home-title">
         <span className="title__line">
-          <StaggerLine text={site.title[0]} />
+          <StaggerLine text={site.title[0]} lit={lit} />
           <span
             ref={slotRef}
             className="burst-slot"
@@ -271,7 +277,7 @@ export function Home({ onSelect }: { onSelect: (id: string) => void }) {
           />
         </span>
         <span className="title__line">
-          <StaggerLine text={site.title[1]} delay={380} />
+          <StaggerLine text={site.title[1]} lit={lit} delay={380} />
         </span>
       </h1>
 

@@ -5,7 +5,7 @@ export const site = {
   /** words in `title` that get the highlighter swipe */
   highlight: ["product", "engineer"],
   blurb:
-    "I build products end to end — design, code, automation — and ship them in public. Currently open to roles and collaborations.",
+    "I build products end to end: design, code, automation, and I ship them in public. Currently open to roles and collaborations.",
   email: "wavedidwhat@gmail.com",
   bubbles: [
     "shipping something right now",
@@ -150,16 +150,16 @@ export const views: View[] = [
     tint: { light: "#8FB89A", dark: "#485C4D" },
     kicker: "Product engineering",
     title: "Things I built as a product engineer",
-    period: "2025 — now",
+    period: "2025–now",
     body: [
-      "Own the whole thing or don't take it. Most of what's below went from an empty repo to something running in production — research, design system, schema, frontend, automation, deploy.",
+      "Own the whole thing or don't take it. Most of what's below went from an empty repo to something running in production: research, design system, schema, frontend, automation, deploy.",
     ],
     entries: [
       {
         title: "RelayHelp",
         group: "Products",
         blurb: "Discord-native support desk. Live, with paying communities.",
-        meta: "2025 — now",
+        meta: "2025–now",
         view: "relayhelp",
       },
       {
@@ -173,21 +173,21 @@ export const views: View[] = [
         title: "Collabo",
         group: "Products",
         blurb: "The missing layer that matches creatives with each other.",
-        meta: "2025 — now",
+        meta: "2025–now",
         view: "collabo",
       },
       {
         title: "wavedidwhat HQ",
         group: "Internal",
         blurb: "Personal ops PWA that replaced thirty browser tabs.",
-        meta: "2026 — now",
+        meta: "2026–now",
         view: "hq",
       },
       {
         title: "Remote Dev Kit",
         group: "Tooling",
         blurb: "VS Code extension that deploys a project in two commands.",
-        meta: "2026 — now",
+        meta: "2026–now",
         view: "rdk",
       },
       {
@@ -250,28 +250,28 @@ export const views: View[] = [
     title: "Work I do for other people",
     period: "Available now",
     body: [
-      "Contract and employed engineering for other teams — backend, integrations and automation, on products I don't own.",
+      "Contract and employed engineering for other teams. Backend, integrations and automation, on products I don't own.",
       "Kept separate from the projects I built myself, because they're different claims and shouldn't be read as the same one.",
     ],
     entries: [
       {
         title: "GIGA",
         group: "Contract",
-        blurb: "Contract engineer — microservices behind one API gateway.",
+        blurb: "Contract engineer · microservices behind one API gateway.",
         meta: "2026",
         view: "giga",
       },
       {
         title: "Mintro",
         group: "Contract",
-        blurb: "Contract backend + AI engineer — Plaid, QuickBooks, categorisation.",
+        blurb: "Contract backend + AI engineer · Plaid, QuickBooks, categorisation.",
         meta: "2026",
         view: "mintro",
       },
       {
         title: "Bean Studio",
         group: "Contract",
-        blurb: "Bot and backend engineer — mint drop tooling and services.",
+        blurb: "Bot and backend engineer · mint drop tooling and services.",
         meta: "TBC",
         view: "beanstudio",
       },
@@ -307,18 +307,18 @@ export const views: View[] = [
     title: "Contributions",
     period: "ongoing",
     body: [
-      "Work on other people's projects — issues, patches and the unglamorous maintenance that keeps tools usable.",
+      "Work on other people's projects: issues, patches, and the unglamorous maintenance that keeps tools usable.",
       "PLACEHOLDER: I don't know which repos you contribute to. Send me the list (or your GitHub handle) and I'll replace these rows with real ones.",
     ],
     entries: [
       {
         title: "Project name",
-        blurb: "What you contributed — the PR, the fix, the feature.",
+        blurb: "What you contributed: the PR, the fix, the feature.",
         meta: "TBC",
       },
       {
         title: "Project name",
-        blurb: "What you contributed — the PR, the fix, the feature.",
+        blurb: "What you contributed: the PR, the fix, the feature.",
         meta: "TBC",
       },
     ],
@@ -336,7 +336,7 @@ export const views: View[] = [
     brand: "#EE1E25",
     appIcon: "/icons/ise.svg",
     tint: { light: "#D4867D", dark: "#6A433F" },
-    kicker: "Product — in build",
+    kicker: "Product · in build",
     title: "Ișę",
     role: "Founder, research → engineering",
     period: "2026",
@@ -345,7 +345,7 @@ export const views: View[] = [
       { value: "Automation", label: "first architecture" },
     ],
     body: [
-      "Ișę means “work” in Yoruba. It connects African talent with global opportunities — because the talent was never the missing piece, the pipeline was.",
+      "Ișę means “work” in Yoruba. It connects African talent with global opportunities, because the talent was never the missing piece, the pipeline was.",
       "Founder mode across the whole stack: research, design, engineering, automation. n8n pipelines handle discovery and enrichment so humans only handle decisions.",
     ],
     stack: ["Next.js", "Supabase", "n8n", "Playwright"],
@@ -362,10 +362,10 @@ export const views: View[] = [
     tile: "#FFFFFF",
     brand: "#CE203A",
     tint: { light: "#B4C9DF", dark: "#5A6570" },
-    kicker: "Product — live",
+    kicker: "Product · live",
     title: "RelayHelp",
     role: "Founder, design + engineering",
-    period: "2025 — now",
+    period: "2025–now",
     outcomes: [
       { value: "Live", label: "in production" },
       { value: "Solo", label: "end-to-end build" },
@@ -373,7 +373,7 @@ export const views: View[] = [
     ],
     body: [
       "Communities were paying for support portals their members never opened. RelayHelp puts the whole desk inside Discord, where they already are.",
-      "I designed and shipped all of it alone — ticket threads, staff tooling, analytics, billing. Next.js and Supabase underneath, the Discord API doing the heavy lifting at the edge.",
+      "I designed and shipped all of it alone: ticket threads, staff tooling, analytics, billing. Next.js and Supabase underneath, the Discord API doing the heavy lifting at the edge.",
     ],
     stack: ["Next.js", "Supabase", "Discord API", "Postgres"],
     media: [
@@ -392,7 +392,7 @@ export const views: View[] = [
     ],
     caseStudy: {
       premise:
-        "A support desk nobody visits is just a ticket graveyard. The fix wasn't a better portal — it was not having one.",
+        "A support desk nobody visits is just a ticket graveyard. The fix wasn't a better portal. It was not having one.",
       chapters: [
         {
           label: "the problem",
@@ -407,7 +407,7 @@ export const views: View[] = [
           title: "Put the desk inside the room",
           body: [
             "Rather than pull people to a portal, RelayHelp opens a private thread in the server they're already in. Members type one command; staff get structure without leaving Discord either.",
-            "The hard part isn't the bot — it's making threads behave like tickets. Ownership, status, SLA timers and audit history all have to survive a medium that was never designed to carry them.",
+            "The hard part isn't the bot. It's making threads behave like tickets. Ownership, status, SLA timers and audit history all have to survive a medium that was never designed to carry them.",
           ],
           media: [
             {
@@ -416,7 +416,7 @@ export const views: View[] = [
               messages: [
                 { from: "user", text: "/help my payout is stuck" },
                 { from: "tool", text: "thread opened · #ticket-4182 · assigned: unclaimed", meta: "system" },
-                { from: "bot", text: "Thread created — only you and staff can see this. Someone will pick it up shortly." },
+                { from: "bot", text: "Thread created, only you and staff can see this. Someone will pick it up shortly." },
                 { from: "tool", text: "claimed by @mod_kemi · SLA 4h", meta: "system" },
               ],
             },
@@ -427,7 +427,7 @@ export const views: View[] = [
           title: "Live, and paid for",
           body: [
             "Shipped solo end to end: ticket threads, staff tooling, analytics and billing. Communities pay for it, which is the only review that counts.",
-            "The analytics turned out to matter more than expected — once you can see what people ask repeatedly, most of the support load becomes a documentation problem.",
+            "The analytics turned out to matter more than expected, once you can see what people ask repeatedly, most of the support load becomes a documentation problem.",
           ],
         },
       ],
@@ -444,10 +444,10 @@ export const views: View[] = [
     brand: "#4EC9B0",
     appIcon: "/icons/rdk.svg",
     tint: { light: "#D4AF8F", dark: "#6B5D4F" },
-    kicker: "Developer tooling — shipped",
+    kicker: "Developer tooling · shipped",
     title: "Remote Dev Kit",
     role: "Design + engineering",
-    period: "2026 — now",
+    period: "2026–now",
     outcomes: [
       { value: "Published", label: "vs code marketplace" },
       { value: "One file", label: "per project config" },
@@ -455,7 +455,7 @@ export const views: View[] = [
     ],
     body: [
       "Shipping a side project used to mean an afternoon of Docker, DNS and certificate archaeology. RDK turns it into two commands and a panel in your editor.",
-      "It's a VS Code extension with a CLI underneath. One per-project file drives both — the extension picks up edits on save, and the same config runs `rdk connect` once and `rdk up` from then on. It builds the image on the VPS, attaches the container to the proxy network and issues the certificate, with an optional reaper that stops idle stacks and keeps their volumes.",
+      "It's a VS Code extension with a CLI underneath. One per-project file drives both. The extension picks up edits on save, and the same config runs `rdk connect` once and `rdk up` from then on. It builds the image on the VPS, attaches the container to the proxy network and issues the certificate, with an optional reaper that stops idle stacks and keeps their volumes.",
     ],
     stack: ["VS Code API", "TypeScript", "Docker", "Traefik", "Let's Encrypt"],
     links: [
@@ -481,7 +481,7 @@ export const views: View[] = [
           { out: "✓ context remote-v2portfolio\n✓ wrote .env.remote" },
           { comment: "every deploy after that" },
           { cmd: "rdk up" },
-          { out: "[+] Building 31.9s (19/19) FINISHED\n✓ attached to proxy network\n✓ certificate issued — wave.dev.wavedidwhat.com\n✓ live in 48s" },
+          { out: "[+] Building 31.9s (19/19) FINISHED\n✓ attached to proxy network\n✓ certificate issued, wave.dev.wavedidwhat.com\n✓ live in 48s" },
         ],
       },
     ],
@@ -519,10 +519,10 @@ export const views: View[] = [
     tile: "#3B5BDB",
     brand: "#3B5BDB",
     tint: { light: "#B4C9DF", dark: "#5A6570" },
-    kicker: "Product — MVP",
+    kicker: "Product · MVP",
     title: "Collabo",
     role: "Founder, product + full-stack",
-    period: "2025 — now",
+    period: "2025–now",
     outcomes: [
       { value: "MVP", label: "shipped" },
       { value: "Waitlist", label: "and growing" },
@@ -545,17 +545,17 @@ export const views: View[] = [
     tile: "#B8860B",
     brand: "#B8860B",
     tint: { light: "#E8B86D", dark: "#745C37" },
-    kicker: "Internal — daily driver",
+    kicker: "Internal, daily driver",
     title: "wavedidwhat HQ",
     role: "Architect + sole engineer",
-    period: "2026 — now",
+    period: "2026–now",
     outcomes: [
       { value: "30 → 1", label: "tabs replaced by one app" },
       { value: "Daily", label: "runs the whole operation" },
     ],
     body: [
       "Running products, content, a job hunt and a life used to mean thirty browser tabs. Now it's one installable PWA that runs itself.",
-      "Content pipelines, job-hunt automation, a learning tracker and OSINT tooling — Supabase as the spine, n8n as the nervous system, Postiz for distribution.",
+      "Content pipelines, job-hunt automation, a learning tracker and OSINT tooling, Supabase as the spine, n8n as the nervous system, Postiz for distribution.",
     ],
     stack: ["Next.js PWA", "Supabase", "n8n", "Postiz"],
     media: [{ kind: "site", label: "the ops PWA" }],
@@ -580,7 +580,7 @@ export const views: View[] = [
     role: "Design + engineering",
     period: "2026",
     body: [
-      "PLACEHOLDER: a monorepo with marketing, dashboard and studio apps — but no README, so I haven't guessed at what it does. One line from you and I'll write this properly.",
+      "PLACEHOLDER: a monorepo with marketing, dashboard and studio apps, but no README, so I haven't guessed at what it does. One line from you and I'll write this properly.",
     ],
     stack: ["Next.js", "TypeScript"],
   },
@@ -599,7 +599,7 @@ export const views: View[] = [
     role: "Design + engineering",
     period: "2026",
     body: [
-      "PLACEHOLDER: it has a web app and a registry, and there's a nullapt CLI on this machine for signing and publishing WASM-sandboxed skills — but I'd rather you describe it than have me infer it from tooling.",
+      "PLACEHOLDER: it has a web app and a registry, and there's a nullapt CLI on this machine for signing and publishing WASM-sandboxed skills, but I'd rather you describe it than have me infer it from tooling.",
     ],
     stack: ["Rust", "WASM", "TypeScript"],
   },
@@ -619,7 +619,7 @@ export const views: View[] = [
     role: "Design + engineering",
     period: "2026",
     body: [
-      "Email delivery breaks in the least convenient way: a provider degrades and you hear about it from your users. CourierX routes across six — SendGrid, Mailgun, SES, Postmark, Resend and raw SMTP — with priority-based selection and automatic failover.",
+      "Email delivery breaks in the least convenient way: a provider degrades and you hear about it from your users. CourierX routes across six of them (SendGrid, Mailgun, SES, Postmark, Resend and raw SMTP) with priority-based selection and automatic failover.",
       "Webhook processing keeps delivery status current in real time, so a bounce is a signal rather than a surprise.",
     ],
     stack: ["Node.js", "Postgres", "Webhooks"],
@@ -652,14 +652,14 @@ export const views: View[] = [
     brand: "#B0472B",
     gradient: ["#D4653F", "#E6997D", "#F7DCD1"],
     tint: { light: "#D98668", dark: "#7A3020" },
-    kicker: "Role — contract",
+    kicker: "Role · contract",
     title: "GIGA",
     role: "Contract engineer",
     period: "2026",
     body: [
       "A multi-service platform behind a single API gateway, with an admin dashboard over the top and documented flows for the teams consuming it.",
       "The interesting part is the seam: microservices are easy to draw and hard to operate, so most of the work is in the gateway and in the docs that keep frontend and mobile developers unblocked.",
-      "Contract engagement — I engineered on this, I don't own it.",
+      "Contract engagement. I engineered on this, I don't own it.",
     ],
     stack: ["API Gateway", "Microservices", "Docker"],
   },
@@ -674,14 +674,14 @@ export const views: View[] = [
     markSrc: "/icons/mintro.svg",
     gradient: ["#22A877", "#6ECBA6", "#D2EFE3"],
     tint: { light: "#63C4A1", dark: "#0B5C41" },
-    kicker: "Role — contract",
+    kicker: "Role · contract",
     title: "Mintro",
     role: "Contract backend + AI engineer",
     period: "2026",
     body: [
-      "A financial dashboard for contractors and small businesses — categorising transactions and turning them into a profitability picture rather than a pile of receipts.",
+      "A financial dashboard for contractors and small businesses, categorising transactions and turning them into a profitability picture rather than a pile of receipts.",
       "I was the contract backend and AI engineer: the integration surface with QuickBooks and Plaid, and the categorisation that has to be right often enough to be trusted with someone's books. Supabase edge functions and migrations underneath, so that logic sits next to the data.",
-      "Contract engagement — not my product.",
+      "Contract engagement, not my product.",
 
     ],
     stack: ["Supabase", "Deno", "Postgres", "Plaid", "QuickBooks"],
@@ -704,7 +704,7 @@ export const views: View[] = [
     period: "2026",
     body: [
       "Multi-platform Event Stream Hub: real-time message ingestion that connects several communication platforms into one processing pipeline.",
-      "FastAPI with workers behind it — the kind of system where the hard part is ordering and back-pressure, not the endpoints.",
+      "FastAPI with workers behind it. The kind of system where the hard part is ordering and back-pressure, not the endpoints.",
     ],
     stack: ["FastAPI", "Python", "Workers"],
     media: [
@@ -731,7 +731,7 @@ export const views: View[] = [
     appIcon: "/icons/honeybyte.png",
     gradient: ["#E0B637", "#EFD284", "#FAF0D2"],
     tint: { light: "#E5C05C", dark: "#8A6A0F" },
-    kicker: "Role — senior engineer",
+    kicker: "Role · senior engineer",
     title: "Honeybyte",
     role: "Senior Engineer (backend)",
     period: "current",
@@ -741,7 +741,7 @@ export const views: View[] = [
     ],
     body: [
       "Honeybyte teaches digital safety habits to kids, teens and adults through bite-size lessons, games and real-world simulations, guided by a companion character called Hexa. Duolingo, but for not getting got online.",
-      "I'm the senior backend engineer on it — the Django services behind the lessons, accounts and progress, rather than the product itself. This one isn't mine; I work on it.",
+      "I'm the senior backend engineer on it, the Django services behind the lessons, accounts and progress, rather than the product itself. This one isn't mine; I work on it.",
     ],
     stack: ["Django", "Python", "Postgres"],
     media: [{ kind: "site", device: "phone", href: "https://www.honeybyteapp.com", label: "the app" }],
@@ -778,7 +778,7 @@ export const views: View[] = [
     appIcon: "/icons/beanstudio.svg",
     gradient: ["#F0C95F", "#F5DC9A", "#FBF1D8"],
     tint: { light: "#EFCE72", dark: "#8A6A1E" },
-    kicker: "Role — bot + backend",
+    kicker: "Role · bot + backend",
     title: "Bean Studio",
     role: "Bot and backend engineer",
     period: "TBC",
@@ -787,9 +787,9 @@ export const views: View[] = [
       { value: "Mint", label: "drop tooling" },
     ],
     body: [
-      "Bot and backend engineering — the services behind the product rather than the surface, and the automation that had to keep working while a drop was live.",
-      "That included mint bots: tooling that watches for a drop, manages wallets and nonces, prices gas against the current block and submits in time to actually land an allocation. Minting is a latency problem wearing a web3 costume — most of the engineering is queueing, retries and not getting rate-limited.",
-      "PLACEHOLDER: I've written this from what you told me — bot and backend engineer, mint bots. I don't have dates, a link, or which parts were yours, so check the wording before this goes anywhere near a recruiter.",
+      "Bot and backend engineering, the services behind the product rather than the surface, and the automation that had to keep working while a drop was live.",
+      "That included mint bots: tooling that watches for a drop, manages wallets and nonces, prices gas against the current block and submits in time to actually land an allocation. Minting is a latency problem wearing a web3 costume. Most of the engineering is queueing, retries and not getting rate-limited.",
+      "PLACEHOLDER: I've written this from what you told me, bot and backend engineer, mint bots. I don't have dates, a link, or which parts were yours, so check the wording before this goes anywhere near a recruiter.",
     ],
     stack: ["Node.js", "Web3", "Queues", "Backend"],
     media: [{ kind: "site", device: "laptop", href: "https://beanstudio.xyz", label: "the studio site" }],
@@ -807,7 +807,7 @@ export const views: View[] = [
     appIcon: "/icons/shipper.png",
     gradient: ["#4F46E5", "#8B87F0", "#DAD8FA"],
     tint: { light: "#8B87F0", dark: "#312B8A" },
-    kicker: "Role — contract",
+    kicker: "Role · contract",
     title: "Shipper.now",
     role: "Full-stack backend contractor",
     period: "a few months",
@@ -816,9 +816,9 @@ export const views: View[] = [
       { value: "AI", label: "build apps by messaging" },
     ],
     body: [
-      "Shipper.now builds complete apps from a messaging interface — you describe what you want and it ships it.",
+      "Shipper.now builds complete apps from a messaging interface, you describe what you want and it ships it.",
       "I contracted on the backend for a few months. Contract engagement, not my product.",
-      "PLACEHOLDER: dates and which parts were yours — tell me and I'll tighten this.",
+      "PLACEHOLDER: dates and which parts were yours, tell me and I'll tighten this.",
     ],
     stack: ["Node.js", "Backend", "AI"],
     media: [{ kind: "site", device: "laptop", href: "https://shipper.now", label: "the product" }],
@@ -844,8 +844,8 @@ export const views: View[] = [
       { value: "Nigeria+", label: "events near you" },
     ],
     body: [
-      "Event discovery that lives where people already talk. Tiximo is a bot across Telegram, WhatsApp and Discord that finds concerts, parties and events near you — Nigeria first, and beyond.",
-      "Platform adapters normalise three very different messaging APIs into one engine, so a flow is written once and rendered per platform. Neon and Drizzle for the data, ClickHouse for analytics, Redis for cache, and cheap models routed through OpenRouter for intent parsing and event summaries — the AI is a component, not the pitch.",
+      "Event discovery that lives where people already talk. Tiximo is a bot across Telegram, WhatsApp and Discord that finds concerts, parties and events near you, Nigeria first, and beyond.",
+      "Platform adapters normalise three very different messaging APIs into one engine, so a flow is written once and rendered per platform. Neon and Drizzle for the data, ClickHouse for analytics, Redis for cache, and cheap models routed through OpenRouter for intent parsing and event summaries. The AI is a component, not the pitch.",
     ],
     stack: ["TypeScript", "grammy", "Hono", "Neon", "ClickHouse", "Redis"],
     media: [
@@ -855,9 +855,9 @@ export const views: View[] = [
         messages: [
           { from: "user", text: "any afrobeats shows in Lagos this weekend?" },
           { from: "tool", text: "intent: find_events · city=Lagos · genre=afrobeats · window=weekend", meta: "parsed" },
-          { from: "bot", text: "Three near you this weekend — Sat: Alté Cruise, Victoria Island. Sun: Palmwine Sessions, Lekki. Sun: Detty Rave warm-up, Ikeja." },
+          { from: "bot", text: "Three near you this weekend, Sat: Alté Cruise, Victoria Island. Sun: Palmwine Sessions, Lekki. Sun: Detty Rave warm-up, Ikeja." },
           { from: "user", text: "remind me about the first one" },
-          { from: "bot", text: "Done — I'll ping you Saturday at 4pm, two hours before doors." },
+          { from: "bot", text: "Done, I'll ping you Saturday at 4pm, two hours before doors." },
         ],
       },
     ],
@@ -884,7 +884,7 @@ export const views: View[] = [
       { value: "Design", label: "systems + motion" },
     ],
     body: [
-      "I'm a product engineer who doesn't hand off. I do the research, the design system, the schema, the frontend, the automation and the deploy — then I stream the whole thing so people can see how it was actually made.",
+      "I'm a product engineer who doesn't hand off. I do the research, the design system, the schema, the frontend, the automation and the deploy, then I stream the whole thing so people can see how it was actually made.",
       "Most of what's here is solo work taken from a blank repo to something running in production with real users. I like problems where the interesting part is the plumbing nobody sees.",
       "Open to full-time roles, contract work and collaborations.",
     ],
